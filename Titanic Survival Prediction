@@ -1,0 +1,157 @@
+# Load necessary libraries and tools
+import pandas as pd
+import matplotlib.pyplot as plt
+import pylab as pl
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_score, classification_report,
+                             ConfusionMatrixDisplay, confusion_matrix)
+
+file_path = r"C:\Users\User\Documents\Personal\Career\Data Analytics\Projects\CodSoft\Titanic-Dataset.csv"
+df = pd.read_csv(file_path)  # Load dataset
+
+print(df.info())
+print(df.describe())
+print(df.isnull().sum())  # Shows the number of null values in the dataset
+
+# Fill null values in the Age and Embarked column and remove unnecessary columns
+df['Age'] = df['Age'].fillna(df['Age'].mean())
+df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])
+df.drop(axis=1, columns=['Cabin', 'PassengerId', 'Name', 'Ticket'], inplace=True)
+df.info()
+
+# Transform male and female in Sex column to 0 and 1
+df['Sex'] = df['Sex'].map({'male': 0, 'female': 1})
+print(df['Sex'].head(), df['Sex'].info())
+
+# Transform S, C and Q to 0, 1 and 2
+df['Embarked'] = df['Embarked'].map({'S': 0, 'Q': 1, 'C': 2})
+print(df['Embarked'].head(), df['Embarked'].info())
+
+# Exploratory Data Analysis (EDA) and Descriptive Analysis
+survived_count = df['Survived'].value_counts(ascending=True)
+perc_surv_count = df['Survived'].value_counts(ascending=True, normalize=True)
+print(f"Survival Count:{survived_count}\nSurvival Count(%):{perc_surv_count}")
+
+sex_count = df['Sex'].value_counts(ascending=True)
+perc_sex_count = df['Sex'].value_counts(ascending=True, normalize=True)
+print(f"Gender:{sex_count}\nGender(%):{perc_sex_count}")
+
+emb_count = df['Embarked'].value_counts(ascending=True)
+per_emb_count = df['Embarked'].value_counts(ascending=True, normalize=True)
+print(f"Embarked: {emb_count}\nEmbarked(%): {per_emb_count}")
+
+pclass_count = df['Pclass'].value_counts()
+perc_pclass_count = df['Pclass'].value_counts(normalize=True)
+print(f"Passenger Class:{pclass_count}\nPassenger Class(%):{perc_pclass_count}")
+
+sibsp_count = df['SibSp'].value_counts()
+perc_sibsp_count = df['SibSp'].value_counts(normalize=True)
+print(f"Siblings/Spouse:{sibsp_count}\nSiblings/Spouse(%):{perc_sibsp_count}")
+
+parch_count = df['Parch'].value_counts()
+perc_parch_count = df['Parch'].value_counts(normalize=True)
+print(f"Siblings/Spouse:{parch_count}\nSiblings/Spouse(%):{perc_parch_count}")
+
+sns.countplot(df, x='Survived', palette='icefire')
+plt.title("Survival Distribution", fontsize=16)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.xticks([0, 1], ['Deceased', 'Survived'], fontsize=12)
+plt.xlabel("Life Status", fontsize=14)
+plt.show()
+
+sns.countplot(df, x='Sex', palette='icefire')
+plt.title("Gender Distribution", fontsize=16)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.xlabel("Gender", fontsize=14)
+plt.xticks(ticks=[0, 1], labels=['Male', 'Female'], fontsize=12)
+plt.show()
+
+sns.countplot(df, x='Sex', hue='Survived')
+plt.title("Survival Distribution by Gender", fontsize=16)
+plt.xlabel("Gender", fontsize=14)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.xticks(ticks=[0, 1], labels=['Male', 'Female'], fontsize=12)
+plt.legend(["Deceased", "Survived"])
+plt.show()
+
+sns.countplot(df, x='Pclass', hue='Survived')
+plt.title("Survival Distribution by Passenger Class", fontsize=16)
+plt.xlabel("Passenger Class", fontsize=14)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.xticks(ticks=[0, 1, 2], labels=['1st class', '2nd class', '3rd class'], fontsize=12)
+plt.legend(["Deceased", "Survived"])
+plt.show()
+
+sns.countplot(df, x='Embarked', hue='Survived')
+plt.title("Survival Distribution by Port", fontsize=16)
+plt.xlabel("Port", fontsize=14)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.xticks(ticks=[0, 1, 2], labels=['Southampton', 'Queenstown', 'Cherbourg'], fontsize=12)
+plt.legend(["Deceased", "Survived"])
+plt.show()
+
+sns.countplot(df, x='SibSp', hue='Survived')
+plt.title("Survival Distribution by Number of Siblings/Spouse", fontsize=16)
+plt.xlabel("Siblings/Spouse Count", fontsize=14)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.legend(["Deceased", "Survived"])
+plt.show()
+
+sns.countplot(df, x='Parch', hue='Survived')
+plt.title("Survival Distribution by Number of Parent/Children", fontsize=16)
+plt.xlabel("Parent/Children Count", fontsize=14)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.legend(["Deceased", "Survived"])
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.histplot(df, x="Age", hue="Survived", kde=True, palette="coolwarm")
+plt.title("Survival Distribution by Age", fontsize=16)
+plt.xlabel("Age", fontsize=14)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.legend(["Deceased", "Survived"])
+plt.show()
+
+plt.figure(figsize=(6, 4))
+sns.histplot(df, x="Fare", hue="Survived", kde=True, palette="coolwarm")
+plt.title("Survival Distribution by Fare", fontsize=16)
+plt.xlabel("Fare", fontsize=14)
+plt.ylabel("Passenger Count", fontsize=14)
+plt.legend(["Deceased", "Survived"])
+plt.show()
+
+# Selecting fields for data modelling
+x_field = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked']
+X = df[x_field]
+y = df['Survived']
+
+# Splitting data into 80/20 segments for training and testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Using Logistic Regression Model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+y_pred_prob = model.predict_proba(X_test)
+
+# Performance of prediction model
+print(f"Accuracy: {accuracy_score(y_test, y_pred)}")
+print(f"Precision: {precision_score(y_test, y_pred)}")
+print(f"Recall: {recall_score(y_test, y_pred)}")
+print(f"F1 Score: {f1_score(y_test, y_pred)}")
+print(f"\nClassification Report:\n {classification_report(y_test, y_pred)}")
+
+# Visual representation of model using Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+cmd = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=model.classes_)
+cmd.plot(cmap="Blues")
+plt.xlabel("Predicted")
+plt.xticks(ticks=[0, 1], labels=['Deceased', 'Survived'])
+plt.ylabel("Actual")
+pl.yticks(ticks=[0, 1], labels=['Deceased', 'Survived'])
+plt.title("Confusion Matrix", fontsize=16)
+plt.show()
