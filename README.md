@@ -1,2 +1,2 @@
 # CODSOFT
-For all projects done while on internship with CodSoft
+For all projects completed while on internship with CodSoft
