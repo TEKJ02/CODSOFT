@@ -1,0 +1,180 @@
+# Load necessary libraries and tools
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import r2_score, mean_absolute_error
+
+file_path = r"C:\Users\User\Documents\Personal\Career\Data Analytics\Projects\CodSoft\Advertising\advertising.csv"
+df = pd.read_csv(file_path)  # Load dataset
+
+print(df.info())
+print(df.describe())
+print(df.isnull().sum())    # No null values
+
+# Exploratory Data Analysis
+plt.figure(figsize=(10, 6))
+sns.scatterplot(df, x='TV', y='Sales')
+plt.title("TV Advertising Spend vs. Sales", fontsize=16)
+plt.xlabel("TV Advertising Spend", fontsize=14)
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(df, x='Radio', y='Sales')
+plt.title("Radio Advertising Spend vs. Sales", fontsize=16)
+plt.xlabel("Radio Advertising Spend", fontsize=14)
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(df, x='Newspaper', y='Sales')
+plt.title("Newspaper Advertising Spend vs. Sales", fontsize=16)
+plt.xlabel("Newspaper Advertising Spend", fontsize=14)
+plt.show()
+
+sns.heatmap(df.corr(), cmap="crest", annot=True)
+plt.title("Correlation Map", fontsize=16)
+plt.show()
+
+# TV-Sales model and its performance
+X_1 = df['TV']
+y_1 = df['Sales']
+
+X_train1, X_test1, y_train1, y_test1 = train_test_split(X_1, y_1, test_size=0.2, random_state=42)
+
+X_train_sm1 = sm.add_constant(X_train1)
+model_lr1 = sm.OLS(y_train1, X_train_sm1).fit()
+pred_train1 = model_lr1.predict(X_train_sm1)
+print(model_lr1.summary())
+
+X_test_sm1 = sm.add_constant(X_test1)
+pred_test1 = model_lr1.predict(X_test_sm1)
+
+mae1 = mean_absolute_error(y_test1, pred_test1)
+r_sq1 = r2_score(y_test1, pred_test1)
+
+print(f"\nMean Absolute Error: {mae1}\n"       # Mean Absolute Error: 1.95 (Indicates accurate predictions) 
+      f"R2 Score: {r_sq1}")                    # R2 Score: 0.8 (Indicates model fits the data)
+
+plt.scatter(X_train1, y_train1)
+plt.plot(X_train1, X_train1 * 0.0555 + 7.0071, 'y')
+plt.title("Sales vs. TV Advertising Spend (Train Data)", fontsize=16)
+plt.xlabel("TV Ad Spend", fontsize=14)
+plt.ylabel("Sales", fontsize=14)
+plt.show()
+
+plt.scatter(X_test1, y_test1)
+plt.plot(X_test1, X_test1 * 0.0555 + 7.0071, 'y')
+plt.title("Sales vs. TV Advertising Spend (Test Data)", fontsize=16)
+plt.xlabel("TV Ad Spend", fontsize=14)
+plt.ylabel("Sales", fontsize=14)
+plt.show()
+
+# Radio-Sales model and its performance
+X_2 = df['Radio']
+y_2 = df['Sales']
+
+X_train2, X_test2, y_train2, y_test2 = train_test_split(X_2, y_2, test_size=0.2, random_state=42)
+
+X_train_sm2 = sm.add_constant(X_train2)
+model_lr2 = sm.OLS(y_train2, X_train_sm2).fit()
+pred_train2 = model_lr2.predict(X_train_sm2)
+print(model_lr2.summary())
+
+X_test_sm2 = sm.add_constant(X_test2)
+pred_test2 = model_lr2.predict(X_test_sm2)
+
+mae2 = mean_absolute_error(y_test2, pred_test2)
+r_sq2 = r2_score(y_test2, pred_test2)
+
+print(f"\nMean Absolute Error: {mae2}\n"        # Mean Absolute Error: 4.59 (Indicates inaccurate predictions)
+      f"R2 Score: {r_sq2}")                     # R2 Score: 0.11 (Indicates model doesn't fit the data)
+
+plt.scatter(X_train2, y_train2)
+plt.plot(X_train2, X_train2 * 0.12 + 12.5855, 'y')
+plt.title("Sales vs. Radio Advertising Spend (Train Data)", fontsize=16)
+plt.xlabel("Radio Ad Spend", fontsize=14)
+plt.ylabel("Sales", fontsize=14)
+plt.show()
+
+plt.scatter(X_test2, y_test2)
+plt.plot(X_test2, X_test2 * 0.12 + 12.5855, 'y')
+plt.title("Sales vs. Radio Advertising Spend (Test Data)", fontsize=16)
+plt.xlabel("Radio Ad Spend", fontsize=14)
+plt.ylabel("Sales", fontsize=14)
+plt.show()
+
+# Newspaper-Sales model and its performance
+X_3 = df['Newspaper']
+y_3 = df['Sales']
+
+X_train3, X_test3, y_train3, y_test3 = train_test_split(X_3, y_3, test_size=0.2, random_state=42)
+
+X_train_sm3 = sm.add_constant(X_train3)
+model_lr3 = sm.OLS(y_train3, X_train_sm3).fit()
+pred_train3 = model_lr3.predict(X_train_sm3)
+print(model_lr3.summary())
+
+X_test_sm3 = sm.add_constant(X_test3)
+pred_test3 = model_lr3.predict(X_test_sm3)
+
+mae3 = mean_absolute_error(y_test3, pred_test3)
+r_sq3 = r2_score(y_test3, pred_test3)
+
+print(f"\nMean Absolute Error: {mae3}\n"        # Mean Absolute Error: 4.76 (Indicates inaccurate predictions)  
+      f"R2 Score: {r_sq3}")                     # R2 Score: 0.004 (Indicates model doesn't fit the data at all)
+
+plt.scatter(X_train3, y_train3)
+plt.plot(X_train3, X_train3 * 0.0372 + 14.2174, 'y')
+plt.title("Sales vs. Newspaper Advertising Spend (Train Data)", fontsize=16)
+plt.xlabel("Newspaper Ad Spend", fontsize=14)
+plt.ylabel("Sales", fontsize=14)
+plt.show()
+
+plt.scatter(X_test3, y_test3)
+plt.plot(X_test3, X_test3 * 0.0372 + 14.2174, 'y')
+plt.title("Sales vs. Newspaper Advertising Spend (Test Data)", fontsize=16)
+plt.xlabel("Newspaper Ad Spend", fontsize=14)
+plt.ylabel("Sales", fontsize=14)
+plt.show()
+
+# All advertising platforms-Sales model and its performance
+X = df[['TV', 'Radio', 'Newspaper']]
+y = df['Sales']
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+X_train_sm = sm.add_constant(X_train)
+model_lr = sm.OLS(y_train, X_train_sm).fit()
+pred_train = model_lr.predict(X_train_sm)
+print(model_lr.summary())
+
+X_test_sm = sm.add_constant(X_test)
+pred_test = model_lr.predict(X_test_sm)
+
+mae = mean_absolute_error(y_test, pred_test)
+r_sq = r2_score(y_test, pred_test)
+
+print(f"\nMean Absolute Error: {mae}\n"         # Mean Absolute Error: 1.27 (Indicates accurate predictions)
+      f"R2 Score: {r_sq}")                      # R2 Score: 0.91 (Indicates model fits the data)
+
+# Visualization for advertising platform importance
+advert = ['TV', 'Radio', 'Newspaper']
+coefficients = model_lr.params[1:]
+
+platform_importance = pd.DataFrame({
+    "platform": advert,
+    "importance": coefficients
+}).sort_values(by="importance", key=abs, ascending=False)
+
+plt.figure(figsize=(10, 6))
+sns.barplot(platform_importance, x="importance", y="platform", palette="icefire")
+plt.title("Advertising Platform Importance", fontsize=16)
+plt.xlabel("Coefficient Value", fontsize=14)
+plt.ylabel("Advertising Platform", fontsize=14)
+plt.show()                                     # TV has more effect on Sales, followed by Radio, then Newspaper
