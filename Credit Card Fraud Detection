@@ -1,0 +1,96 @@
+# Load necessary libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import RandomOverSampler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score, precision_score, recall_score, classification_report
+
+file_path = r"C:\Users\User\Documents\Personal\Career\Data Analytics\Projects\CodSoft\Fraud Detection\creditcard.csv"
+df = pd.read_csv(file_path) # Load dataset
+
+print(df.head())
+print(df.info())
+print(df.isnull().sum()) # No null values
+
+class_count = df['Class'].value_counts()
+perc_class_count = df['Class'].value_counts(normalize=True)
+print(f"\nClass Count: {class_count}\n"
+      f"Class Count(%): {perc_class_count}")
+
+# Identifying fraud cases (where fraud is 1 and not fraud is 0)
+fraud = df[df['Class'] == 1]
+not_fraud = df[df['Class'] == 0]
+
+# Exploratory Data Analysis
+plt.figure(figsize=(10, 6))
+sns.countplot(df, x='Class')
+plt.title("Fraud Transaction Distribution")
+plt.xticks([0, 1], ['Not Fraud', 'Fraud'])
+plt.ylabel("Number of Transactions")
+plt.xlabel("Outcome")
+plt.show()
+
+sns.boxplot(df, x='Class', y='Amount')
+plt.xticks([0, 1], ['Not Fraud', 'Fraud'])
+plt.show()
+
+plt.figure(figsize=(10, 6))
+fraud['Time'].hist(color='red')
+plt.title('Fraud Transaction Over Time')
+plt.xlabel('Time(Seconds)')
+plt.ylabel('Fraud Count')
+plt.show()
+
+# Feature Distribution
+X = df.drop(columns=['Class'])
+y = df['Class']
+print(X.sample)
+
+X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Initialize StandardScaler
+scaler = StandardScaler()
+X_tr_scaled = scaler.fit_transform(X_train1)
+X_tt_scaled = scaler.transform(X_test1)
+
+# Implementing random over-sampling technique
+ros = RandomOverSampler(random_state=42)
+X_train_ros, y_train_ros = ros.fit_resample(X_tr_scaled, y_train1)
+print(f"{X_train_ros.shape}\n{y_train_ros.shape}\n")
+
+# Implementing Random Forest Classifier Model
+model_rfc = RandomForestClassifier(n_estimators=500, random_state=42, n_jobs=-1)
+model_rfc.fit(X_train_ros, y_train_ros)
+y_pred = model_rfc.predict(X_tt_scaled)
+
+# Evaluation of the model's performance
+print(f"Precision Score: {precision_score(y_test1, y_pred)}\n"
+      f"F1 Score: {f1_score(y_test1, y_pred)}\n"
+      f"Recall Score: {recall_score(y_test1, y_pred)}\n"
+      f"\nClassification Report:\n {classification_report(y_test1, y_pred)}")
+
+# Implementing Logistic Regression Model
+X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+scaler = StandardScaler()
+X_tr_scaled1 = scaler.fit_transform(X_train2)
+X_tt_scaled1 = scaler.transform(X_test2)
+
+ros = RandomOverSampler(random_state=42)
+X_train_ros1, y_train_ros1 = ros.fit_resample(X_tr_scaled1, y_train2)
+
+model_lr = LogisticRegression(max_iter=1500, n_jobs=-1)
+model_lr.fit(X_train_ros1, y_train_ros1)
+
+y_pred1 = model_lr.predict(X_tt_scaled1)
+
+# Evaluation of the model's performance
+print(f"Precision Score: {precision_score(y_test2, y_pred1)}\n"
+      f"F1 Score: {f1_score(y_test2, y_pred1)}\n"
+      f"Recall Score: {recall_score(y_test2, y_pred1)}\n"
+      f"\nClassification Report:\n {classification_report(y_test2, y_pred1)}")
