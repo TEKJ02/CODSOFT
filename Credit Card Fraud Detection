@@ -11,11 +11,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, precision_score, recall_score, classification_report
 
 file_path = r"C:\Users\User\Documents\Personal\Career\Data Analytics\Projects\CodSoft\Fraud Detection\creditcard.csv"
-df = pd.read_csv(file_path) # Load dataset
+df = pd.read_csv(file_path)  # Load dataset
 
 print(df.head())
 print(df.info())
-print(df.isnull().sum()) # No null values
+print(df.isnull().sum())  # No null values
 
 class_count = df['Class'].value_counts()
 perc_class_count = df['Class'].value_counts(normalize=True)
@@ -94,3 +94,25 @@ print(f"Precision Score: {precision_score(y_test2, y_pred1)}\n"
       f"F1 Score: {f1_score(y_test2, y_pred1)}\n"
       f"Recall Score: {recall_score(y_test2, y_pred1)}\n"
       f"\nClassification Report:\n {classification_report(y_test2, y_pred1)}")
+
+#  Visualization of Model Performance Comparison
+model_perf = {
+    'Model': ['Logistic Regression', 'Random Forest'],
+    'Precision': [0.06, 0.95],
+    'F1': [0.11, 0.86],
+    'Recall': [0.92, 0.79]
+}
+
+df1 = pd.DataFrame(model_perf)
+df_melt = df1.melt(id_vars='Model', var_name='Metric', value_name='Score')
+
+plt.figure(figsize=(12, 8))
+comp_mod = sns.barplot(df_melt, x='Metric', y='Score', hue='Model', palette='icefire')
+
+for container in comp_mod.containers:
+    comp_mod.bar_label(container)
+
+plt.title("Comparison Of Model Performance")
+plt.ylabel("Score")
+plt.xlabel("Metric")
+plt.show()
